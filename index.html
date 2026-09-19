@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090909">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Miss PeppeR Gastro Controlling V13</title>
+<style>
+:root{--bg:#090909;--panel:#151515;--panel2:#1d1d1d;--red:#e30613;--red2:#b9040e;--text:#fff;--muted:#aaa;--line:#303030}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{background:#050505;border-bottom:2px solid var(--red);padding:20px 16px 16px;position:sticky;top:0;z-index:10}
+.brand{font-size:24px;font-weight:800;letter-spacing:.2px}.brand span{color:var(--red)}
+nav{display:flex;gap:8px;margin-top:14px;overflow:auto}nav button{border:1px solid #333;background:#171717;color:#fff;border-radius:9px;padding:10px 13px;white-space:nowrap;font-weight:700}nav button.active{background:var(--red);border-color:var(--red)}
+main{max-width:1100px;margin:auto;padding:18px 14px 50px}.page{display:none}.page.active{display:block}
+h1{font-size:22px;margin:8px 0 16px}.section-title{font-size:15px;color:#fff;margin:22px 0 10px;border-left:4px solid var(--red);padding-left:9px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px}.card strong{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}.value{font-size:22px;font-weight:800}.red{color:var(--red)}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:700}input,select{width:100%;background:#101010;border:1px solid #3a3a3a;color:#fff;border-radius:9px;padding:11px;font-size:15px}input:focus,select:focus{outline:2px solid var(--red);border-color:var(--red)}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
+button.primary{background:var(--red);color:#fff;border:0;border-radius:9px;padding:12px 16px;font-weight:800;font-size:15px}button.secondary{background:#252525;color:#fff;border:1px solid #444;border-radius:9px;padding:11px 14px;font-weight:700}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.table-wrap{overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px}.table{width:100%;border-collapse:collapse;min-width:850px}.table th,.table td{padding:10px 9px;border-bottom:1px solid #2c2c2c;text-align:left;font-size:12px}.table th{color:#ccc;background:#1b1b1b;position:sticky;top:0}.table td{color:#eee}.small{font-size:12px;color:var(--muted);line-height:1.45}.empty{padding:24px;text-align:center;color:var(--muted)}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.kpi-main-grid{grid-template-columns:repeat(6,minmax(0,1fr));min-width:980px}.kpi-main-wrap{overflow-x:auto}.kpi-main-grid .kpi{min-width:150px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px}.kpi .label{color:var(--muted);font-size:12px;font-weight:700}.kpi .num{font-size:23px;font-weight:800;margin-top:7px}
+.badge{display:inline-block;border:1px solid #444;border-radius:999px;padding:4px 8px;font-size:11px;color:#ccc}.badge.red{border-color:var(--red);color:#fff}
+.calendar{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;margin-top:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.cal-title{font-size:17px;font-weight:800;text-transform:capitalize}
+.cal-btn{background:#252525;color:#fff;border:1px solid #444;border-radius:8px;padding:8px 12px;font-weight:800}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-weekday{text-align:center;color:var(--muted);font-size:11px;font-weight:800;padding:5px 0}
+.cal-day{background:#101010;color:#fff;border:1px solid #292929;border-radius:8px;min-height:42px;font-weight:800}
+.cal-day.empty{visibility:hidden}.cal-day.selected{background:var(--red);border-color:var(--red)}
+.cal-day.has-data{box-shadow:inset 0 -3px 0 var(--red)}
+.cal-day.selected.has-data{box-shadow:none}
+
+@media(max-width:650px){.grid,.formgrid,.kpi-grid{grid-template-columns:1fr}.brand{font-size:21px}.table{min-width:950px}}
+</style>
+
+<style>
+.settings-btn{position:fixed;top:14px;right:14px;z-index:10000;width:42px;height:42px;padding:0;border:1px solid #444;border-radius:50%;background:#171717;color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.readonly-value{padding:10px 12px;border:1px solid #444;border-radius:8px;background:#222;color:#ddd}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);align-items:center;justify-content:center;z-index:9999}
+.modal-content{width:min(460px,92vw);background:#171717;color:#fff;border:1px solid #444;border-radius:14px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-header{display:flex;align-items:center;justify-content:space-between}
+.modal-header button{font-size:24px}
+.modal-content label{display:block;margin:14px 0}
+.modal-content input{width:100%;box-sizing:border-box}
+.error{color:#ff6b6b;margin-top:10px}
+.muted{color:#aaa;font-size:.9rem}
+</style>
+
+
+<style>
+.operational-productivity{margin:12px 0;padding:16px;border:1px solid #555;border-radius:12px;background:#1b1b1b}
+.operational-productivity .kpi-label{font-size:.9rem;color:#aaa}
+.operational-productivity .kpi-value{font-size:1.55rem;font-weight:700;margin-top:4px}
+.operational-productivity .kpi-note{font-size:.8rem;color:#999;margin-top:4px}
+.readonly-value{padding:10px 12px;border:1px solid #444;border-radius:8px;background:#222;color:#ddd}
+</style>
+
+
+<style>
+.settings-section{margin:18px 0;padding-top:14px;border-top:1px solid #333}
+.settings-section h3{margin:0 0 8px;font-size:15px}
+.settings-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}
+.settings-check{display:flex;align-items:center;gap:8px;padding:9px 10px;background:#101010;border:1px solid #333;border-radius:8px;color:#ddd;font-size:13px}
+.settings-check input{width:auto;margin:0}
+.settings-actions-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.settings-actions-row button{width:auto}
+.sort-btn{border:0;background:transparent;color:#aaa;padding:0 0 0 4px;margin:0;cursor:pointer;font-size:12px;width:auto;display:inline}.sort-btn:hover{color:#fff}
+@media(max-width:650px){.settings-check-grid{grid-template-columns:1fr}}
+</style>
+
+</head>
+<body>
+<header>
+<button type="button" class="settings-btn" onclick="openSettings()" aria-label="Einstellungen" title="Einstellungen">⚙️</button>
+  <div class="brand">Miss PeppeR <span>Gastro Controlling</span></div>
+  <nav>
+    <button data-page="day" class="active">Tageserfassung</button>
+    <button data-page="kpi">Kennzahlen</button>
+    <button data-page="month">Monat</button>
+    <button data-page="compare">Betriebsvergleich</button>
+  </nav>
+</header>
+<main>
+<section id="page-day" class="page active">
+<h1>Tageserfassung</h1>
+<div class="card">
+<div class="formgrid">
+<div><label>Datum</label><div id="dayCalendar" class="calendar"></div><input id="date" type="hidden"></div>
+<div><label>Betrieb</label><select id="business"></select></div>
+</div>
+
+<div class="section-title">Umsatz</div>
+<div class="formgrid">
+<div><label>Küche brutto (7 % MwSt.)</label><input id="kitchenGross" type="number" step="0.01" min="0" value="0"></div>
+<div><label>Service brutto (19 % MwSt.)</label><input id="serviceGross" type="number" step="0.01" min="0" value="0"></div>
+</div>
+<div class="section-title">Umsatzübersicht Brutto / Netto</div>
+<div class="grid" style="margin-top:12px">
+<div class="card">
+<strong>👨‍🍳 Küche · 7 % MwSt.</strong>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div><span class="small">Brutto</span><div class="value" id="kitchenGrossView">0,00 €</div></div>
+<div><span class="small">Netto</span><div class="value red" id="kitchenNet">0,00 €</div></div>
+</div>
+</div>
+<div class="card">
+<strong>🍔 Service · 19 % MwSt.</strong>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div><span class="small">Brutto</span><div class="value" id="serviceGrossView">0,00 €</div></div>
+<div><span class="small">Netto</span><div class="value red" id="serviceNet">0,00 €</div></div>
+</div>
+</div>
+</div>
+
+<div class="section-title">Stunden</div>
+<div class="formgrid">
+<div><label>👨‍🍳 Küchen-Arbeitsstunden</label><input id="kitchenHours" type="number" step="0.25" min="0" value="0"></div>
+<div><label>🍔 Service-Arbeitsstunden</label><input id="serviceHours" type="number" step="0.25" min="0" value="0"></div>
+<div><label>💼 Administrative Stunden im Betrieb</label><input id="adminHours" type="number" step="0.25" min="0" value="0"></div>
+<div><label>🏖️ Urlaubsstunden</label><input id="vacationHours" type="number" step="0.25" min="0" value="0"></div>
+<div><label>🤒 Krankheitsstunden</label><input id="sickHours" type="number" step="0.25" min="0" value="0"></div>
+</div>
+<div class="card" style="margin-top:12px;background:#101010;border-color:#444">
+  <strong>Gesamtstunden</strong>
+  <div class="value red" id="allHours">0,00 Std.</div>
+  <div class="small">Automatische Summe aus Küche + Service + Administration + Urlaub + Krankheit.</div>
+</div>
+
+<div class="section-title">Personalkosten</div>
+<div class="formgrid">
+<div>
+<label>Kalkulierter durchschnittlicher Stundenlohn (€)</label>
+
+<div class="small" style="margin-top:6px">Der Wert wird zentral in den Controlling-Einstellungen hinterlegt und für die Personalkostenberechnung verwendet.</div>
+<div class="card" style="margin-top:12px;background:#101010;border-color:#444">
+  <strong>Berechnete Personalkosten</strong>
+  <div class="value red" id="calculatedPersonnelCost">0,00 €</div>
+  <div class="small">Gesamtstunden × kalkulierter durchschnittlicher Stundenlohn</div>
+</div>
+<label style="margin-top:12px">Hinzurechnungsbetrag pro Tag (€)</label>
+
+<div class="small" style="margin-top:6px">Zusätzlicher Tagesbetrag für Kosten, die nicht in den gestempelten Zeiten enthalten sind.</div>
+</div>
+</div>
+
+<div class="section-title">Automatische Kennzahlen</div>
+<div class="kpi-grid">
+<div class="kpi"><div class="label">Gesamt-Netto-Umsatz</div>
+<div class="num" id="totalNet">0,00 €</div></div>
+<div class="kpi"><div class="label">Küchenproduktivität</div><div class="num" id="kitchenProd">0,00 €/Std.</div></div>
+<div class="kpi"><div class="label">Serviceproduktivität</div><div class="num" id="serviceProd">0,00 €/Std.</div></div>
+<div class="kpi"><div class="label">Gesamtproduktivität</div><div class="num" id="totalProd">0,00 €/Std.</div></div>
+<div class="kpi"><div class="label">Personalkosten %</div><div class="num" id="personnelPct">0,00 %</div></div>
+</div>
+<div class="actions"><button class="primary" id="save">Tag speichern</button><button class="secondary" id="reset">Zurücksetzen</button></div>
+</div>
+
+<div class="section-title">Erfasste Tage</div>
+<div class="table-wrap"><table class="table"><thead><tr>
+<th>Datum</th><th>Betrieb</th><th>Küche brutto</th><th>Küche netto</th><th>Service brutto</th><th>Service netto</th><th>Küche Std.</th><th>Service Std.</th><th>Admin</th><th>Urlaub</th><th>Krank</th><th>Produktivität</th><th>PK %</th><th>Aktion</th>
+</tr></thead><tbody id="dayRows"></tbody></table></div>
+</section>
+
+<section id="page-kpi" class="page">
+<h1>Kennzahlen</h1>
+<div class="card">
+  <div class="formgrid">
+    <div><label>Datum</label><div id="kpiCalendar" class="calendar"></div><input id="kpiDate" type="hidden"></div>
+    <div><label>Betrieb</label><select id="kpiBusiness"></select></div>
+  </div>
+</div>
+
+<div class="section-title">Automatische Kennzahlen</div>
+<div id="kpiContent">
+  <div class="kpi-main-wrap">
+    <div class="kpi-grid kpi-main-grid">
+      <div class="kpi"><div class="label">Brutto-Umsatz</div><div class="num red" id="kTotalGross">0,00 €</div></div>
+      <div class="kpi"><div class="label">Netto-Umsatz</div><div class="num red" id="kTotalNet">0,00 €</div></div>
+      <div class="kpi"><div class="label">Gesamtproduktivität</div><div class="num" id="kTotalProd">0,00 €/Std.</div></div>
+      <div class="kpi"><div class="label">Küchenproduktivität</div><div class="num" id="kKitchenProd">0,00 €/Std.</div></div>
+      <div class="kpi"><div class="label">Serviceproduktivität</div><div class="num" id="kServiceProd">0,00 €/Std.</div></div>
+      <div class="kpi"><div class="label">Personalkosten %</div><div class="num" id="kPersonnelPct">0,00 %</div></div>
+    </div>
+  </div>
+</div>
+<div id="kpiEmpty" class="card empty" style="display:none;margin-top:12px">Für diesen Betrieb und dieses Datum wurden noch keine Daten erfasst.</div>
+</section>
+
+<section id="page-month" class="page">
+<h1>Monatsübersicht</h1>
+<div class="card"><div class="formgrid">
+<div><label>Monat</label><input id="monthSelect" type="month"></div>
+<div><label>Betrieb</label><select id="monthBusiness"></select></div>
+</div></div>
+<div class="kpi-grid" style="margin-top:14px">
+<div class="kpi"><div class="label">Küche netto</div><div class="num" id="mKitchenNet">0,00 €</div></div>
+<div class="kpi"><div class="label">Service netto</div><div class="num" id="mServiceNet">0,00 €</div></div>
+<div class="kpi"><div class="label">Gesamt-Netto</div><div class="num" id="mTotalNet">0,00 €</div></div>
+<div class="kpi"><div class="label">Küchenstunden</div><div class="num" id="mKitchenHours">0,00</div></div>
+<div class="kpi"><div class="label">Servicestunden</div><div class="num" id="mServiceHours">0,00</div></div>
+<div class="kpi"><div class="label">Administrative Stunden</div><div class="num" id="mAdminHours">0,00</div></div>
+<div class="kpi"><div class="label">Urlaubsstunden</div><div class="num" id="mVacationHours">0,00</div></div>
+<div class="kpi"><div class="label">Krankheitsstunden</div><div class="num" id="mSickHours">0,00</div></div>
+<div class="kpi"><div class="label">Gesamtstunden</div><div class="num" id="mAllHours">0,00</div></div>
+<div class="kpi"><div class="label">Produktive Gesamtstunden</div><div class="num" id="mProductiveHours">0,00</div></div>
+<div class="kpi"><div class="label">Küchenproduktivität</div><div class="num" id="mKitchenProd">0,00 €/Std.</div></div>
+<div class="kpi"><div class="label">Serviceproduktivität</div><div class="num" id="mServiceProd">0,00 €/Std.</div></div>
+<div class="kpi"><div class="label">Gesamtproduktivität</div><div class="num" id="mTotalProd">0,00 €/Std.</div></div>
+<div class="kpi"><div class="label">Personalkosten %</div><div class="num" id="mPersonnelPct">0,00 %</div></div>
+</div>
+<div class="section-title">Tage im ausgewählten Monat</div>
+<div class="table-wrap"><table class="table"><thead><tr><th>Datum</th><th>Küche brutto</th><th>Küche netto</th><th>Service brutto</th><th>Service netto</th><th>Küche Std.</th><th>Service Std.</th><th>Admin</th><th>Urlaub</th><th>Krank</th><th>PK</th></tr></thead><tbody id="monthRows"></tbody></table></div>
+</section>
+
+<section id="page-compare" class="page">
+<h1>Betriebsvergleich</h1>
+<div class="card"><div class="formgrid">
+<div><label>Monat</label><input id="compareMonth" type="month"></div>
+<div><label>Neue Betriebe hinzufügen</label><input id="newBusiness" placeholder="z. B. Miss Pepper Musterstadt"></div>
+</div><div class="actions"><button class="primary" id="addBusiness">Betrieb hinzufügen</button></div>
+<p class="small">Alle aktuell auf der offiziellen Miss PeppeR-Standortseite aufgeführten Standorte sind hinterlegt. Weitere Betriebe können bei Bedarf ergänzt werden.</p></div>
+<div class="section-title">Vergleich</div>
+<div class="table-wrap"><table class="table"><thead><tr><th>Betrieb</th><th>Netto</th><th>Küche Std.</th><th>Service Std.</th><th>Admin</th><th>Urlaub</th><th>Krank</th><th>Gesamtstunden</th><th>Produktive Std.</th><th>Gesamtprod.</th><th>PK %</th></tr></thead><tbody id="compareRows"></tbody></table></div>
+</section>
+</main>
+
+<div id="settingsModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>⚙ Controlling-Einstellungen</h2>
+      <button type="button" onclick="closeSettings()">×</button>
+    </div>
+    <div id="settingsLogin">
+      <p>Die Einstellungen sind geschützt.</p>
+      <label>PIN
+        <input id="settingsPin" type="password" inputmode="numeric" autocomplete="off" maxlength="6">
+      </label>
+      <button type="button" onclick="unlockSettings()">Einstellungen öffnen</button>
+      <div id="settingsPinError" class="error"></div>
+    </div>
+    <div id="settingsForm" style="display:none;">
+      <label>Kalkulierter durchschnittlicher Stundenlohn (€)
+        <input id="settingsHourlyWage" type="number" min="0" step="0.01" inputmode="decimal" value="18.50" autocomplete="off">
+      </label>
+      <label>Fester Hinzurechnungsbetrag pro Tag (€)
+        <input id="settingsDailyAdjustment" type="number" min="0" step="0.01">
+      </label>
+      <div class="settings-section">
+        <h3>Betriebsvergleich</h3>
+        <p class="muted">Wähle hier, welche Kennzahlen und Betriebe im Betriebsvergleich angezeigt werden.</p>
+        <div id="compareMetricSettings" class="settings-check-grid"></div>
+        <div class="settings-actions-row">
+          <button type="button" class="secondary" onclick="selectAllCompareMetrics()">Alle Kennzahlen</button>
+          <button type="button" class="secondary" onclick="selectCoreCompareMetrics()">Nur Kernkennzahlen</button>
+        </div>
+        <div id="compareBusinessSettings" class="settings-check-grid"></div>
+      </div>
+      <p class="muted">Diese Werte gelten zentral für alle Betriebe und Tage.</p><p class="small">Version V26</p>
+      <button type="button" onclick="saveSettings()">Speichern</button>
+      <button type="button" onclick="closeSettings()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const key="misspepper_gastro_controlling_v2";
+const defaults=["Barsbüttel", "Bockenem", "Bornheim", "Dasing", "Dettelbach", "Kammerstein", "Köln Frechen", "Niederdorf", "Paderborn", "Schwarmstedt", "Soltau", "Wittenburg", "Zorbau", "Hilden", "Wilhelmshaven (Lizenzpartner)"];
+let state=JSON.parse(localStorage.getItem(key)||"null")||{
+  businesses:[...defaults],
+  days:[],
+  settings:{
+    averageHourlyWage:18.50,
+    dailyPersonnelAdjustment:0,
+    compareMetrics:["net","allHours","productiveHours","totalProd","personnelPct"],
+    compareBusinesses:[...defaults]
+  }
+};
+if(!state.settings)state.settings={averageHourlyWage:18.50};
+if(state.settings.averageHourlyWage===undefined)state.settings.averageHourlyWage=18.50;
+if(!Array.isArray(state.businesses))state.businesses=[];
+state.businesses=[...new Set([...defaults,...state.businesses])];
+state.settings.compareBusinesses=[...new Set((state.settings.compareBusinesses||state.businesses).filter(b=>state.businesses.includes(b)))];
+if(!state.settings.compareBusinesses.length)state.settings.compareBusinesses=[...state.businesses];
+if(!Array.isArray(state.days))state.days=[];
+saveState();
+const eur=v=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Number(v)||0);
+const num=v=>Number(v)||0;
+const today=()=>new Date().toISOString().slice(0,10);
+const month=()=>today().slice(0,7);
+$("date").value=today();$("monthSelect").value=month();$("compareMonth").value=month();$("kpiDate").value=today();
+
+function effectivePersonnelCost(record){return (num(record.allH)||((num(record.prodH)+num(record.ah)+num(record.vh)+num(record.sick))))*state.settings.averageHourlyWage+num(record.dailyPersonnelAdjustment);}
+function saveState(){localStorage.setItem(key,JSON.stringify(state));}
+function fillBusinesses(){
+  [$("business"),$("monthBusiness"),$("kpiBusiness")].forEach(sel=>{
+    const old=sel.value;sel.innerHTML="";
+    state.businesses.forEach(b=>{const o=document.createElement("option");o.value=b;o.textContent=b;sel.appendChild(o)});
+    if(state.businesses.includes(old))sel.value=old;
+  });
+}
+let calendarMonth = month();
+let kpiCalendarMonth = month();
+const monthNames=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+function renderCalendar(targetId,inputId,monthValue,setMonth){
+ const el=$(targetId); if(!el)return;
+ const [y,m]=monthValue.split("-").map(Number);
+ const first=new Date(y,m-1,1), last=new Date(y,m,0);
+ const offset=(first.getDay()+6)%7;
+ let s='<div class="cal-head"><button class="cal-btn" type="button" data-cal-prev>‹</button><div class="cal-title">'+monthNames[m-1]+' '+y+'</div><button class="cal-btn" type="button" data-cal-next>›</button></div>';
+ s+='<div class="cal-grid">';
+ ["Mo","Di","Mi","Do","Fr","Sa","So"].forEach(d=>s+='<div class="cal-weekday">'+d+'</div>');
+ for(let i=0;i<offset;i++)s+='<div class="cal-day empty"></div>';
+ for(let d=1;d<=last.getDate();d++){
+   const ds=monthValue+"-"+String(d).padStart(2,"0");
+   const selected=$(inputId).value===ds;
+   const businessId=inputId==="kpiDate"?"kpiBusiness":"business";
+   const has=state.days.some(x=>x.date===ds && x.business===$(businessId).value);
+   s+='<button class="cal-day'+(selected?' selected':'')+(has?' has-data':'')+'" type="button" data-date="'+ds+'">'+d+'</button>';
+ }
+ s+='</div>';
+ el.innerHTML=s;
+ el.querySelector("[data-cal-prev]").onclick=()=>{
+   const d=new Date(y,m-2,1);
+   setMonth(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));
+ };
+ el.querySelector("[data-cal-next]").onclick=()=>{
+   const d=new Date(y,m,1);
+   setMonth(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));
+ };
+ el.querySelectorAll("[data-date]").forEach(btn=>btn.onclick=()=>{
+   $(inputId).value=btn.dataset.date;
+   if(inputId==="date"){
+     calendarMonth=btn.dataset.date.slice(0,7);
+     renderCalendar(targetId,inputId,calendarMonth,setMonth);
+     renderDays();
+   }else{
+     kpiCalendarMonth=btn.dataset.date.slice(0,7);
+     renderCalendar(targetId,inputId,kpiCalendarMonth,setMonth);
+     renderKpi();
+   }
+ });
+}
+function renderCalendars(){
+ renderCalendar("dayCalendar","date",calendarMonth,v=>{calendarMonth=v;renderCalendar("dayCalendar","date",calendarMonth,v=>{calendarMonth=v;renderCalendars()})});
+ renderCalendar("kpiCalendar","kpiDate",kpiCalendarMonth,v=>{kpiCalendarMonth=v;renderCalendars()});
+}
+function calc(){
+  const kg=num($("kitchenGross").value),sg=num($("serviceGross").value);
+  const kn=kg/1.07,sn=sg/1.19,tn=kn+sn;
+  const kh=num($("kitchenHours").value),sh=num($("serviceHours").value);
+  const ah=num($("adminHours").value),vh=num($("vacationHours").value),sick=num($("sickHours").value);
+  const wage=Number(state.settings.averageHourlyWage||0),adj=Number(state.settings.dailyPersonnelAdjustment||0);
+  const prodH=kh+sh, allH=prodH+ah+vh+sick;
+  const calculatedPk=allH*wage, effectivePk=calculatedPk+adj;
+
+  $("kitchenGrossView").textContent=eur(kg);$("serviceGrossView").textContent=eur(sg);
+  $("kitchenNet").textContent=eur(kn);$("serviceNet").textContent=eur(sn);$("totalNet").textContent=eur(tn);
+  $("kitchenProd").textContent=kh?eur(kn/kh)+"/Std.":"0,00 €/Std.";
+  $("serviceProd").textContent=sh?eur(sn/sh)+"/Std.":"0,00 €/Std.";
+  $("totalProd").textContent=prodH?eur(tn/prodH)+"/Std.":"0,00 €/Std.";
+  $("allHours").textContent=allH.toLocaleString("de-DE",{minimumFractionDigits:2})+" Std.";
+  $("calculatedPersonnelCost").textContent=eur(calculatedPk);
+  $("personnelPct").textContent=tn?(effectivePk/tn*100).toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})+" %":"0,00 %";
+
+  return {kn,sn,tn,kh,sh,ah,vh,sick,averageHourlyWage:wage,calculatedPk,dailyPersonnelAdjustment:adj,effectivePk,prodH,allH,pp:tn?effectivePk/tn*100:0};
+}
+["kitchenGross","serviceGross","kitchenHours","serviceHours","adminHours","vacationHours","sickHours"].forEach(id=>$(id).addEventListener("input",calc));
+$("business").addEventListener("change",()=>{renderDays();renderCalendars()});
+function resetForm(){["kitchenGross","serviceGross","kitchenHours","serviceHours","adminHours","vacationHours","sickHours"].forEach(id=>$(id).value=0);$("date").value=today();calc();}
+$("reset").onclick=resetForm;
+$("save").onclick=()=>{
+ const c=calc(); const d={id:Date.now(),date:$("date").value,business:$("business").value,...c};
+ const idx=state.days.findIndex(x=>x.id===window.editId);
+ if(idx>=0){d.id=state.days[idx].id;state.days[idx]=d;window.editId=null;$("save").textContent="Tag speichern"}else state.days.push(d);
+ saveState();renderAll();resetForm();
+};
+function renderDays(){
+ const rows=$("dayRows");rows.innerHTML="";
+ const selectedBusiness=$('business').value; const arr=[...state.days].filter(d=>d.business===selectedBusiness).sort((a,b)=>b.date.localeCompare(a.date));
+ if(!arr.length){rows.innerHTML='<tr><td colspan="14" class="empty">Noch keine Tage erfasst.</td></tr>';return}
+ arr.forEach(d=>{
+  const tr=document.createElement("tr");
+  const vals=[d.date,d.business,eur(d.kn*1.07),eur(d.kn),eur(d.sn*1.19),eur(d.sn),d.kh.toLocaleString("de-DE"),d.sh.toLocaleString("de-DE"),d.ah.toLocaleString("de-DE"),d.vh.toLocaleString("de-DE"),d.sick.toLocaleString("de-DE"),d.prodH?eur(d.tn/d.prodH)+"/Std.":"–",d.pp.toLocaleString("de-DE",{maximumFractionDigits:2})+" %"];
+  vals.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement("td");const e=document.createElement("button");e.className="secondary";e.textContent="Bearbeiten";e.onclick=()=>editDay(d.id);td.appendChild(e);
+  const del=document.createElement("button");del.className="secondary";del.textContent="Löschen";del.style.marginLeft="5px";del.onclick=()=>{state.days=state.days.filter(x=>x.id!==d.id);saveState();renderAll()};td.appendChild(del);tr.appendChild(td);rows.appendChild(tr);
+ });
+}
+function editDay(id){const d=state.days.find(x=>x.id===id);if(!d)return;window.editId=id;$("date").value=d.date;$("business").value=d.business;$("kitchenGross").value=d.kn*1.07;$("serviceGross").value=d.sn*1.19;$("kitchenHours").value=d.kh;$("serviceHours").value=d.sh;$("adminHours").value=d.ah;$("vacationHours").value=d.vh;$("sickHours").value=d.sick;$("personnelCost").value=d.pk;$("dailyPersonnelAdjustment").value=d.dailyPersonnelAdjustment||0;$("save").textContent="Änderungen speichern";calc();window.scrollTo({top:0,behavior:"smooth"})}
+function sum(arr,k){return arr.reduce((s,x)=>s+num(x[k]),0)}
+function renderMonth(){
+  const m=$("monthSelect").value,b=$("monthBusiness").value;
+  const arr=state.days.filter(d=>d.date.startsWith(m)&&d.business===b);
+  const kn=sum(arr,"kn"),sn=sum(arr,"sn"),tn=kn+sn,
+    kh=sum(arr,"kh"),sh=sum(arr,"sh"),ah=sum(arr,"ah"),vh=sum(arr,"vh"),sick=sum(arr,"sick"),
+    adj=sum(arr,"dailyPersonnelAdjustment"),ph=kh+sh,allH=ph+ah+vh+sick,
+    effectivePk=allH*state.settings.averageHourlyWage+adj;
+  [
+    ["mKitchenNet",eur(kn)],["mServiceNet",eur(sn)],["mTotalNet",eur(tn)],
+    ["mKitchenHours",kh.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mServiceHours",sh.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mAdminHours",ah.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mVacationHours",vh.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mSickHours",sick.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mAllHours",allH.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mProductiveHours",ph.toLocaleString("de-DE",{minimumFractionDigits:2})],
+    ["mKitchenProd",kh?eur(kn/kh)+"/Std.":"0,00 €/Std."],
+    ["mServiceProd",sh?eur(sn/sh)+"/Std.":"0,00 €/Std."],
+    ["mTotalProd",ph?eur(tn/ph)+"/Std.":"0,00 €/Std."],
+    ["mPersonnelPct",tn?(effectivePk/tn*100).toLocaleString("de-DE",{minimumFractionDigits:2})+" %":"0,00 %"]
+  ].forEach(([id,v])=>$(id).textContent=v);
+
+  const rows=$("monthRows");rows.innerHTML="";
+  if(!arr.length){rows.innerHTML='<tr><td colspan="11" class="empty">Keine Einträge für diesen Monat.</td></tr>';return}
+  [...arr].sort((a,b)=>a.date.localeCompare(b.date)).forEach(d=>{
+    const tr=document.createElement("tr");
+    const dayPk=(d.allH!==undefined?d.allH:(d.prodH+d.ah+d.vh+d.sick))*state.settings.averageHourlyWage+num(d.dailyPersonnelAdjustment);
+    [d.date,eur(d.kn*1.07),eur(d.kn),eur(d.sn*1.19),eur(d.sn),d.kh,d.sh,d.ah,d.vh,d.sick,eur(dayPk)]
+      .forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+    rows.appendChild(tr);
+  });
+}
+let compareSort={key:null,dir:1};
+function renderCompare(){
+  const m=$("compareMonth").value,rows=$("compareRows");
+  rows.innerHTML="";
+  const metrics = state.settings.compareMetrics || ["net","allHours","productiveHours","totalProd","personnelPct"];
+  const businesses = (state.settings.compareBusinesses||state.businesses).filter(b=>state.businesses.includes(b));
+  const metricDefs = {
+    net:["Netto","net"], kitchenProd:["Küchenprod.","kitchenProd"], serviceProd:["Serviceprod.","serviceProd"],
+    kitchenHours:["Küche Std.","kh"], serviceHours:["Service Std.","sh"], adminHours:["Admin","ah"], vacationHours:["Urlaub","vh"],
+    sickHours:["Krank","sick"], allHours:["Gesamtstunden","allHours"], productiveHours:["Produktive Std.","productiveHours"],
+    totalProd:["Gesamtprod.","totalProd"], personnelPct:["PK %","personnelPct"]
+  };
+  const thead=rows.parentElement.querySelector("thead tr");
+  thead.innerHTML="<th>Betrieb</th>";
+  metrics.forEach(key=>{
+    if(!metricDefs[key])return;
+    const th=document.createElement("th"), label=document.createElement("span"), btn=document.createElement("button");
+    label.textContent=metricDefs[key][0]; btn.type="button"; btn.className="sort-btn";
+    btn.title="Nach "+metricDefs[key][0]+" sortieren";
+    btn.textContent=compareSort.key===key?(compareSort.dir===1?" ▲":" ▼"):" ↕";
+    btn.onclick=()=>{if(compareSort.key===key)compareSort.dir*=-1;else{compareSort.key=key;compareSort.dir=1;}renderCompare();};
+    th.appendChild(label);th.appendChild(btn);thead.appendChild(th);
+  });
+  if(!businesses.length){rows.innerHTML='<tr><td colspan="'+(metrics.length+1)+'" class="empty">Bitte in den Einstellungen mindestens einen Betrieb auswählen.</td></tr>';return;}
+  const data=businesses.map((b,index)=>{
+    const arr=state.days.filter(d=>d.date.startsWith(m)&&d.business===b);
+    const kn=sum(arr,"kn"),sn=sum(arr,"sn"),tn=kn+sn,kh=sum(arr,"kh"),sh=sum(arr,"sh"),ah=sum(arr,"ah"),vh=sum(arr,"vh"),sick=sum(arr,"sick");
+    const adj=sum(arr,"dailyPersonnelAdjustment"),ph=kh+sh,allH=ph+ah+vh+sick,effectivePk=allH*state.settings.averageHourlyWage+adj;
+    const sortValues={net:tn,kitchenProd:kh?kn/kh:null,serviceProd:sh?sn/sh:null,kitchenHours:kh,serviceHours:sh,adminHours:ah,vacationHours:vh,sickHours:sick,allHours:allH,productiveHours:ph,totalProd:ph?tn/ph:null,personnelPct:tn?effectivePk/tn*100:null};
+    const values={net:eur(tn),kitchenProd:kh?eur(kn/kh)+"/Std.":"–",serviceProd:sh?eur(sn/sh)+"/Std.":"–",kitchenHours:kh.toLocaleString("de-DE",{minimumFractionDigits:2}),serviceHours:sh.toLocaleString("de-DE",{minimumFractionDigits:2}),adminHours:ah.toLocaleString("de-DE",{minimumFractionDigits:2}),vacationHours:vh.toLocaleString("de-DE",{minimumFractionDigits:2}),sickHours:sick.toLocaleString("de-DE",{minimumFractionDigits:2}),allHours:allH.toLocaleString("de-DE",{minimumFractionDigits:2}),productiveHours:ph.toLocaleString("de-DE",{minimumFractionDigits:2}),totalProd:ph?eur(tn/ph)+"/Std.":"–",personnelPct:tn?(effectivePk/tn*100).toLocaleString("de-DE",{maximumFractionDigits:2})+" %":"–"};
+    return {b,index,values,sortValues};
+  });
+  if(compareSort.key&&metrics.includes(compareSort.key)){const key=compareSort.key;data.sort((a,b)=>{const av=a.sortValues[key],bv=b.sortValues[key];if(av===null&&bv===null)return a.index-b.index;if(av===null)return 1;if(bv===null)return -1;return (av-bv)*compareSort.dir||a.index-b.index;});}
+  data.forEach(item=>{const tr=document.createElement("tr"),first=document.createElement("td");first.textContent=item.b;tr.appendChild(first);metrics.forEach(key=>{if(item.values[key]===undefined)return;const td=document.createElement("td");td.textContent=item.values[key];tr.appendChild(td);});rows.appendChild(tr);});
+}
+function renderKpi(){
+ const d=state.days.find(x=>x.date===$("kpiDate").value&&x.business===$("kpiBusiness").value);
+ const empty=$("kpiEmpty"),content=$("kpiContent");
+ if(!d){content.style.display="none";empty.style.display="block";return}
+ content.style.display="block";empty.style.display="none";
+ $("kTotalGross").textContent=eur((d.kg||0)+(d.sg||0));
+ $("kTotalNet").textContent=eur(d.tn);
+ const productiveHours=(d.kh||0)+(d.sh||0);
+ $("kTotalProd").textContent=productiveHours?eur(d.tn/productiveHours)+"/Std.":"0,00 €/Std.";
+ $("kKitchenProd").textContent=d.kh?eur(d.kn/d.kh)+"/Std.":"0,00 €/Std.";
+ $("kServiceProd").textContent=d.sh?eur(d.sn/d.sh)+"/Std.":"0,00 €/Std.";
+ const pk=effectivePersonnelCost(d);
+ $("kPersonnelPct").textContent=d.tn?(pk/d.tn*100).toLocaleString("de-DE",{maximumFractionDigits:2})+" %":"0,00 %";
+}
+
+function renderAll(){fillBusinesses();renderDays();renderMonth();renderCompare();renderKpi();calc();renderCalendars()}
+$("monthSelect").onchange=renderMonth;$("monthBusiness").onchange=renderMonth;$("compareMonth").onchange=renderCompare;
+$("kpiDate").onchange=renderKpi;$("kpiBusiness").onchange=()=>{renderKpi();renderCalendars()};
+$("addBusiness").onclick=()=>{const v=$("newBusiness").value.trim();if(v&&!state.businesses.includes(v)){state.businesses.push(v);saveState();$("newBusiness").value="";renderAll()}};
+document.querySelectorAll("nav button").forEach(btn=>btn.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$("page-"+btn.dataset.page).classList.add("active");if(btn.dataset.page==="kpi")renderKpi();if(btn.dataset.page==="month")renderMonth();if(btn.dataset.page==="compare")renderCompare()});
+fillBusinesses();calc();renderAll();renderCalendars();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+})();
+
+
+const compareMetricDefinitions=[
+  ["net","Netto-Umsatz"],
+  ["kitchenProd","Küchenproduktivität"],
+  ["serviceProd","Serviceproduktivität"],
+  ["kitchenHours","Küchenstunden"],
+  ["serviceHours","Servicestunden"],
+  ["adminHours","Administrative Stunden"],
+  ["vacationHours","Urlaubsstunden"],
+  ["sickHours","Krankheitsstunden"],
+  ["allHours","Gesamtstunden"],
+  ["productiveHours","Produktive Gesamtstunden"],
+  ["totalProd","Gesamtproduktivität"],
+  ["personnelPct","Personalkosten %"]
+];
+
+function renderCompareSettings(){
+  const metricBox=document.getElementById("compareMetricSettings");
+  const businessBox=document.getElementById("compareBusinessSettings");
+  if(!metricBox||!businessBox)return;
+
+  const selectedMetrics=state.settings.compareMetrics||["net","allHours","productiveHours","totalProd","personnelPct"];
+  metricBox.innerHTML='<div style="grid-column:1/-1;font-weight:700;color:#fff;margin-top:4px">Kennzahlen</div>';
+  compareMetricDefinitions.forEach(([key,label])=>{
+    const wrap=document.createElement("label");
+    wrap.className="settings-check";
+    wrap.innerHTML='<input type="checkbox" data-compare-metric="'+key+'"> <span>'+label+'</span>';
+    wrap.querySelector("input").checked=selectedMetrics.includes(key);
+    metricBox.appendChild(wrap);
+  });
+
+  const selectedBusinesses=state.settings.compareBusinesses||state.businesses;
+  businessBox.innerHTML='<div style="grid-column:1/-1;font-weight:700;color:#fff;margin-top:8px">Betriebe</div>';
+  state.businesses.forEach(b=>{
+    const wrap=document.createElement("label");
+    wrap.className="settings-check";
+    wrap.innerHTML='<input type="checkbox" data-compare-business="'+b.replace(/"/g,"&quot;")+'"> <span>'+b.replace(/</g,"&lt;")+'</span>';
+    wrap.querySelector("input").checked=selectedBusinesses.includes(b);
+    businessBox.appendChild(wrap);
+  });
+}
+
+function selectAllCompareMetrics(){
+  document.querySelectorAll("[data-compare-metric]").forEach(x=>x.checked=true);
+}
+function selectCoreCompareMetrics(){
+  const core=["net","allHours","productiveHours","totalProd","personnelPct"];
+  document.querySelectorAll("[data-compare-metric]").forEach(x=>x.checked=core.includes(x.dataset.compareMetric));
+}
+
+function openSettings(){
+  document.getElementById('settingsModal').style.display = 'flex';
+  document.getElementById('settingsLogin').style.display = 'block';
+  document.getElementById('settingsForm').style.display = 'none';
+  document.getElementById('settingsPin').value = '';
+  document.getElementById('settingsPinError').textContent = '';
+}
+function closeSettings(){
+  document.getElementById('settingsModal').style.display = 'none';
+}
+function unlockSettings(){
+  if(document.getElementById('settingsPin').value !== '151218'){
+    document.getElementById('settingsPinError').textContent = 'Falscher PIN.';
+    return;
+  }
+  document.getElementById('settingsLogin').style.display = 'none';
+  document.getElementById('settingsForm').style.display = 'block';
+  document.getElementById('settingsHourlyWage').value = Number(state.settings.averageHourlyWage || 0).toFixed(2);
+  document.getElementById('settingsDailyAdjustment').value = Number(state.settings.dailyPersonnelAdjustment || 0).toFixed(2);
+  renderCompareSettings();
+  const wageInput=document.getElementById('settingsHourlyWage');
+  wageInput.removeAttribute('readonly');
+  wageInput.disabled=false;
+  setTimeout(()=>{ wageInput.focus(); wageInput.select(); }, 50);
+}
+function saveSettings(){
+  const wage = Number(document.getElementById('settingsHourlyWage').value || 0);
+  if(!(wage > 0)){
+    alert("Bitte einen gültigen durchschnittlichen Stundenlohn eingeben.");
+    return;
+  }
+  state.settings.averageHourlyWage = wage;
+  state.settings.dailyPersonnelAdjustment = Number(document.getElementById('settingsDailyAdjustment').value || 0);
+
+  state.settings.compareMetrics=[...document.querySelectorAll("[data-compare-metric]:checked")].map(x=>x.dataset.compareMetric);
+  state.settings.compareBusinesses=[...document.querySelectorAll("[data-compare-business]:checked")].map(x=>x.dataset.compareBusiness);
+
+  if(!state.settings.compareMetrics.length){
+    alert("Bitte mindestens eine Kennzahl für den Betriebsvergleich auswählen.");
+    return;
+  }
+  if(!state.settings.compareBusinesses.length){
+    alert("Bitte mindestens einen Betrieb für den Betriebsvergleich auswählen.");
+    return;
+  }
+
+  saveState();
+  renderAll();
+  updateFixedSettingDisplays();
+  closeSettings();
+}
+function updateFixedAdjustmentDisplay(){
+  const el = document.getElementById('dailyPersonnelAdjustmentDisplay');
+  if(el){
+    el.textContent = Number(state.settings.dailyPersonnelAdjustment || 0).toLocaleString('de-DE', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2
+    }) + ' € (fest eingestellt)';
+  }
+}
+
+
+function updateDailyProductivity(){
+  const el = document.getElementById('dailyProductivity');
+  if(!el) return;
+  const kitchenGross = Number(document.getElementById('kitchenGross')?.value || 0);
+  const serviceGross = Number(document.getElementById('serviceGross')?.value || 0);
+  const kitchenHours = Number(document.getElementById('kitchenHours')?.value || 0);
+  const serviceHours = Number(document.getElementById('serviceHours')?.value || 0);
+
+  const netKitchen = kitchenGross / 1.07;
+  const netService = serviceGross / 1.19;
+  const netRevenue = netKitchen + netService;
+  const productiveHours = kitchenHours + serviceHours;
+  const productivity = productiveHours > 0 ? netRevenue / productiveHours : 0;
+
+  el.textContent = productivity.toLocaleString('de-DE', {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  }) + ' € / Arbeitsstunde';
+}
+
+updateDailyProductivity();
+
+</script>
+</body>
+</html>
