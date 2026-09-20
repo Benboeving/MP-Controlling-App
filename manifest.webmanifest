@@ -1,9 +1,0 @@
-{
-  "name": "Miss PeppeR Gastro Controlling",
-  "short_name": "MP Gastro Controlling",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#111111",
-  "icons": []
-}
